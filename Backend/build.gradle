@@ -1,62 +1,46 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'org.stark'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
 dependencies {
 
-    // --- Core Spring ---
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Core
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // --- Data ---
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Data
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-    // --- Messaging ---
-    implementation 'org.springframework.boot:spring-boot-starter-kafka'
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-
-    // --- Integration ---
-    implementation 'org.springframework.boot:spring-boot-starter-integration'
-    implementation 'org.springframework.integration:spring-integration-kafka'
-    implementation 'org.springframework.integration:spring-integration-redis'
-    implementation 'org.springframework.integration:spring-integration-http'
-
-    // --- Auth ---
-    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-
-    // --- File / Excel ---
-    implementation 'org.apache.poi:poi:5.2.5'
-    implementation 'org.apache.poi:poi-ooxml:5.2.5'
-
-    // --- Utilities ---
-    implementation 'org.apache.commons:commons-lang3'
-    implementation 'commons-io:commons-io:2.15.1'
-
-    // --- JSON Time Support ---
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-
-    // --- API Docs ---
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-    // --- Logging ---
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-
-    // --- Lombok ---
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // --- Runtime DB ---
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
 
-    // --- Dev ---
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-    // --- Tests ---
+    // Tests
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
 }
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
