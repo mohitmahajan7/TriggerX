@@ -8,6 +8,7 @@ public class TriggerXBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TriggerXBackendApplication.class, args);
+        System.out.println("Good Start");
     }
 
 }
