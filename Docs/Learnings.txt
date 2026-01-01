@@ -1,0 +1,168 @@
+01/01/26
+
+1️⃣ Microservices — What & Why
+
+What they are
+
+An architectural style where an application is split into independently deployable services
+
+Each service owns:
+
+Its business capability
+
+Its data
+
+Its deployment lifecycle
+
+Why microservices
+
+Independent scaling (scale only what’s hot 🔥)
+
+Faster deployments & reduced blast radius
+
+Team autonomy (Conway’s Law in action)
+
+Key principles
+
+Single responsibility per service
+
+Database-per-service (no shared DB)
+
+Communicate via APIs/events, not method calls
+
+Failures are expected → design for resilience
+
+2️⃣ API Gateway — The Front Door
+
+Role of the Gateway
+
+Single entry point for all clients (web, mobile, external)
+
+Sits outside microservices, never contains business logic
+
+Responsibilities
+
+Routing requests to correct service
+
+Authentication & Authorization
+
+Rate limiting & throttling
+
+Request/response transformation
+
+Aggregation (optional, careful usage)
+
+What NOT to put in gateway
+❌ Business rules
+❌ DB access
+❌ Stateful logic
+
+Gateway = traffic cop 🚦, not decision maker
+
+3️⃣ Bounded Contexts (DDD Core Idea)
+
+Problem DDD solves
+
+Same word ≠ same meaning everywhere
+Example:
+
+User in Auth ≠ User in Billing ≠ User in Analytics
+
+Bounded Context
+
+A clear boundary within which:
+
+Terms have one meaning
+
+Models are consistent
+
+Teams can move independently
+
+Golden rule
+
+If language or rules change → it’s a different bounded context
+
+4️⃣ DDD Architecture — How to Structure Inside a Service
+Layers (inside ONE microservice)
+
+1. Domain Layer (Core)
+
+Entities, Value Objects, Domain Services
+
+Pure business rules
+
+No frameworks, no DB, no HTTP
+
+2. Application Layer
+
+Use cases (orchestrates domain logic)
+
+Transactions
+
+Calls repositories
+
+No business rules, just flow
+
+3. Infrastructure Layer
+
+DB, messaging, external APIs
+
+Framework-specific code
+
+Implements interfaces defined in domain
+
+4. Interface / API Layer
+
+Controllers, REST endpoints
+
+DTOs
+
+Validation
+
+Mapping
+
+5️⃣ Boundaries — The Most Important Concept Today
+Types of boundaries you learned
+
+1. Service Boundary
+
+Microservice = deployment + data + ownership boundary
+
+2. Context Boundary
+
+Language & model boundary (DDD)
+
+3. Technical Boundary
+
+API vs Domain vs Infrastructure
+
+4. Transaction Boundary
+
+No distributed transactions
+
+Use eventual consistency
+
+Rule of thumb
+
+Crossing a boundary should feel “expensive”
+(API call, event, async message)
+
+6️⃣ Big Picture Mental Model
+Client
+  ↓
+API Gateway
+  ↓
+Microservice (Bounded Context)
+  ├── Controller (API)
+  ├── Application Layer
+  ├── Domain Layer
+  └── Infrastructure Layer
+
+
+Each box:
+
+Owns its data
+
+Owns its rules
+
+Owns its failures
