@@ -1,5 +1,6 @@
 package org.stark.triggerxbackend.infrastructure.repository;
 
+import org.springframework.stereotype.Repository;
 import org.stark.triggerxbackend.core.domain.model.trigger.Trigger;
 import org.stark.triggerxbackend.core.domain.model.trigger.TriggerState;
 import org.stark.triggerxbackend.core.domain.port.TriggerRepository;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Repository
 public class InMemoryTriggerRepository implements TriggerRepository {
 
     private final Map<String, Trigger> store = new ConcurrentHashMap<>();
