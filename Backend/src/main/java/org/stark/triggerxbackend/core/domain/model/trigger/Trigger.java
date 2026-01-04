@@ -1,7 +1,9 @@
 package org.stark.triggerxbackend.core.domain.model.trigger;
-import java.math.BigDecimal;
+import lombok.Getter;
+
 import java.util.UUID;
 
+@Getter
 public class Trigger {
 
     private final String id;
@@ -33,19 +35,4 @@ public class Trigger {
         this.state = TriggerState.TRIGGERED;
     }
 
-    public TriggerState getState() {
-        return state;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public TriggerCondition getCondition() {
-        return condition;
-    }
 }

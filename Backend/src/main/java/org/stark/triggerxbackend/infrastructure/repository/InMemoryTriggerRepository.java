@@ -7,12 +7,13 @@ import org.stark.triggerxbackend.core.domain.port.TriggerRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InMemoryTriggerRepository implements TriggerRepository {
 
-    private final Map<String, Trigger> store = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Trigger> store = new ConcurrentHashMap<>();
 
     @Override
     public void save(Trigger trigger) {
@@ -30,6 +31,6 @@ public class InMemoryTriggerRepository implements TriggerRepository {
                 .stream()
                 .filter(t -> t.getState() == TriggerState.ACTIVE)
                 .filter(t -> t.getSymbol().equals(symbol))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
