@@ -1,4 +1,4 @@
-package org.stark.triggerxbackend.core.infrastructure.repository;
+package org.stark.triggerxbackend.infrastructure.repository;
 
 import org.stark.triggerxbackend.core.domain.model.trigger.Trigger;
 import org.stark.triggerxbackend.core.domain.model.trigger.TriggerState;
