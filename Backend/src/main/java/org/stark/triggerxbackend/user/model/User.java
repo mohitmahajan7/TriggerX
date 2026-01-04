@@ -1,22 +1,42 @@
 package org.stark.triggerxbackend.user.model;
 
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+@Entity
+@Table(name = "users")
 public class User {
 
+    @Id
+    private String id;
 
-    private final String id;
-    private final String email;
-    private final String passwordHash;
-    private final Instant createdAt;
+    @Column(nullable = false, unique = true, updatable = false)
+    private String email;
 
+    @Column(nullable = false)
+    private String passwordHash;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    /**
+     * JPA only
+     */
+    protected User() {
+    }
+
+    /**
+     * Controlled creation
+     */
     public User(String email, String passwordHash) {
         this.id = UUID.randomUUID().toString();
         this.email = email;
         this.passwordHash = passwordHash;
         this.createdAt = Instant.now();
     }
+
+    // ---- getters only ----
 
     public String getId() {
         return id;
@@ -33,5 +53,4 @@ public class User {
     public Instant getCreatedAt() {
         return createdAt;
     }
-
 }
