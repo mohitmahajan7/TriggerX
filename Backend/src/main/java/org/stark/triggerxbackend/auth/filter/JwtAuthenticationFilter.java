@@ -9,14 +9,20 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.stark.triggerxbackend.auth.util.JwtUtil;
 
 import java.io.IOException;
 import java.util.List;
 
+@Component
 public class JwtAuthenticationFilter implements Filter {
 
-    private final JwtUtil jwtUtil = new JwtUtil();
+    private final JwtUtil jwtUtil;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public void doFilter(
@@ -34,6 +40,7 @@ public class JwtAuthenticationFilter implements Filter {
             String token = header.substring(7);
 
             try {
+
                 String email = jwtUtil.extractEmail(token);
 
                 UsernamePasswordAuthenticationToken auth =
@@ -46,7 +53,7 @@ public class JwtAuthenticationFilter implements Filter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
-                // invalid token – ignore and continue
+                // invalid token – clear security context
                 SecurityContextHolder.clearContext();
             }
         }
