@@ -1,9 +1,6 @@
 package org.stark.triggerxbackend.auth.controller;
 
-import org.stark.triggerxbackend.auth.dto.LoginRequest;
-import org.stark.triggerxbackend.auth.dto.LoginResponse;
-import org.stark.triggerxbackend.auth.dto.RegisterRequest;
-import org.stark.triggerxbackend.auth.dto.RegisterResponse;
+import org.stark.triggerxbackend.auth.dto.*;
 import org.stark.triggerxbackend.auth.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,11 +19,11 @@ public class AuthController {
         return authService.register(request);
     }
 
-
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginTokenResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
+
 
 
 }

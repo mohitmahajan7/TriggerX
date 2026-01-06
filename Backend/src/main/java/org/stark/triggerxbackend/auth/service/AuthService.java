@@ -1,10 +1,8 @@
 package org.stark.triggerxbackend.auth.service;
 
 import org.springframework.stereotype.Service;
-import org.stark.triggerxbackend.auth.dto.LoginRequest;
-import org.stark.triggerxbackend.auth.dto.LoginResponse;
-import org.stark.triggerxbackend.auth.dto.RegisterRequest;
-import org.stark.triggerxbackend.auth.dto.RegisterResponse;
+import org.stark.triggerxbackend.auth.dto.*;
+import org.stark.triggerxbackend.auth.util.JwtUtil;
 import org.stark.triggerxbackend.user.model.User;
 import org.stark.triggerxbackend.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +12,9 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    private final JwtUtil jwtUtil = new JwtUtil();
+
 
     public AuthService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -34,14 +35,13 @@ public class AuthService {
         return new RegisterResponse(user.getId(), user.getEmail());
     }
 
-
-    public LoginResponse login(LoginRequest request) {
+    public LoginTokenResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.email())
                 .orElse(null);
 
         if (user == null) {
-            return new LoginResponse(false, "Invalid email or password");
+            throw new IllegalStateException("Invalid email or password");
         }
 
         boolean matches = encoder.matches(
@@ -50,10 +50,12 @@ public class AuthService {
         );
 
         if (!matches) {
-            return new LoginResponse(false, "Invalid email or password");
+            throw new IllegalStateException("Invalid email or password");
         }
 
-        return new LoginResponse(true, "Login successful");
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return new LoginTokenResponse(token, user.getEmail());
     }
 
 }
