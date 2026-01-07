@@ -5,6 +5,7 @@ import org.stark.triggerxbackend.auth.dto.*;
 import org.stark.triggerxbackend.auth.util.JwtUtil;
 import org.stark.triggerxbackend.user.model.User;
 import org.stark.triggerxbackend.user.repository.UserRepository;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
@@ -13,11 +14,11 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    private final JwtUtil jwtUtil = new JwtUtil();
+    private final JwtUtil jwtUtil;
 
-
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     public RegisterResponse register(RegisterRequest request) {

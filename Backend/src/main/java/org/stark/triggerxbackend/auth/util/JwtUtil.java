@@ -2,6 +2,7 @@ package org.stark.triggerxbackend.auth.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,9 +11,16 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+    private final String secret;
 
-    @Value("${jwt.secret}")
-    private String secret;
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        this.secret = secret;
+    }
+
+    @PostConstruct
+    public void checkJwt(){
+        System.out.println(secret);
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
