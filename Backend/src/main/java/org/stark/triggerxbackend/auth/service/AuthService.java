@@ -8,6 +8,9 @@ import org.stark.triggerxbackend.auth.event.OtpEventPayload;
 import org.stark.triggerxbackend.auth.event.OtpEventProducer;
 import org.stark.triggerxbackend.auth.otp.OtpStore;
 import org.stark.triggerxbackend.auth.util.JwtUtil;
+import org.stark.triggerxbackend.common.exception.OtpExpiredException;
+import org.stark.triggerxbackend.common.exception.OtpInvalidException;
+import org.stark.triggerxbackend.common.exception.OtpLockedException;
 import org.stark.triggerxbackend.user.model.User;
 import org.stark.triggerxbackend.user.repository.UserRepository;
 
@@ -34,7 +37,7 @@ public class AuthService {
         this.otpEventProducer = otpEventProducer;
     }
 
-    // ================= REGISTER (OTP ONLY) =================
+    // ================= REGISTER =================
 
     public RegisterResponse register(RegisterRequest request) {
 
@@ -43,10 +46,8 @@ public class AuthService {
                     throw new IllegalStateException("Email already registered");
                 });
 
-        // 1️⃣ Generate + store OTP (Redis TTL)
         String otp = otpStore.generateAndStore(request.email());
 
-        // Build OTP event
         OtpEventPayload payload = new OtpEventPayload(
                 "EMAIL_OTP_REQUESTED",
                 request.email(),
@@ -54,10 +55,8 @@ public class AuthService {
                 "REGISTER"
         );
 
-        // Publish event
         try {
-            String json = objectMapper.writeValueAsString(payload);
-            otpEventProducer.send(json);
+            otpEventProducer.send(objectMapper.writeValueAsString(payload));
         } catch (Exception e) {
             throw new RuntimeException("Failed to publish OTP event", e);
         }
@@ -69,39 +68,39 @@ public class AuthService {
 
     public LoginTokenResponse verifyOtp(OtpVerifyRequest request) {
 
-        // 1️⃣ Check lock
         if (otpStore.isLocked(request.email())) {
-            throw new IllegalStateException("Too many OTP attempts. Please resend OTP.");
-        }
-
-        // 2️⃣ Read OTP
-        String storedOtp = otpStore.read(request.email());
-        if (storedOtp == null) {
-            throw new IllegalStateException("OTP expired");
-        }
-
-        // 3️⃣ Compare
-        if (!storedOtp.equals(request.otp())) {
-            otpStore.incrementAttempt(request.email());
-
-            int left = otpStore.attemptsLeft(request.email());
-            throw new IllegalStateException(
-                    "Invalid OTP. Attempts left: " + left
+            throw new OtpLockedException(
+                    otpStore.retryAfterSeconds(request.email())
             );
         }
 
-        // 4️⃣ Success → cleanup
+        String storedOtp = otpStore.read(request.email());
+        if (storedOtp == null) {
+            throw new OtpExpiredException();
+        }
+
+        if (!storedOtp.equals(request.otp())) {
+            otpStore.incrementAttempt(request.email());
+            throw new OtpInvalidException(
+                    "Invalid OTP. Attempts left: " +
+                            otpStore.attemptsLeft(request.email())
+            );
+        }
+
         otpStore.delete(request.email());
 
-        // 5️⃣ Create user
-        String hash = encoder.encode(request.password());
-        User user = new User(request.email(), hash);
+        User user = new User(
+                request.email(),
+                encoder.encode(request.password())
+        );
         userRepository.save(user);
 
-        // 6️⃣ Issue JWT
-        String token = jwtUtil.generateToken(user.getEmail());
-        return new LoginTokenResponse(token, user.getEmail());
+        return new LoginTokenResponse(
+                jwtUtil.generateToken(user.getEmail()),
+                user.getEmail()
+        );
     }
+
 
     // ================= LOGIN =================
 
@@ -114,15 +113,19 @@ public class AuthService {
             throw new IllegalStateException("Invalid email or password");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
-        return new LoginTokenResponse(token, user.getEmail());
+        return new LoginTokenResponse(
+                jwtUtil.generateToken(user.getEmail()),
+                user.getEmail()
+        );
     }
 
+    // ================= LOGOUT =================
+
     public LogoutResponse logout() {
-        // Stateless JWT → nothing to invalidate server-side
         return new LogoutResponse("Logged out successfully");
     }
 
+    // ================= RESEND OTP =================
 
     public RegisterResponse resendOtp(ResendOtpRequest request) {
 
@@ -136,14 +139,11 @@ public class AuthService {
         );
 
         try {
-            String json = objectMapper.writeValueAsString(payload);
-            otpEventProducer.send(json);
+            otpEventProducer.send(objectMapper.writeValueAsString(payload));
         } catch (Exception e) {
             throw new RuntimeException("Failed to publish OTP resend event", e);
         }
 
         return new RegisterResponse("OTP resent", request.email());
     }
-
-
 }
