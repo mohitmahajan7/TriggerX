@@ -62,34 +62,44 @@ public class AuthService {
             throw new RuntimeException("Failed to publish OTP event", e);
         }
 
-        return new RegisterResponse("OTP sent");
+        return new RegisterResponse("OTP sent", request.email());
     }
 
     // ================= VERIFY OTP =================
 
     public LoginTokenResponse verifyOtp(OtpVerifyRequest request) {
 
-        String storedOtp = otpStore.read(request.email());
+        // 1️⃣ Check lock
+        if (otpStore.isLocked(request.email())) {
+            throw new IllegalStateException("Too many OTP attempts. Please resend OTP.");
+        }
 
+        // 2️⃣ Read OTP
+        String storedOtp = otpStore.read(request.email());
         if (storedOtp == null) {
             throw new IllegalStateException("OTP expired");
         }
 
+        // 3️⃣ Compare
         if (!storedOtp.equals(request.otp())) {
-            throw new IllegalStateException("Invalid OTP");
+            otpStore.incrementAttempt(request.email());
+
+            int left = otpStore.attemptsLeft(request.email());
+            throw new IllegalStateException(
+                    "Invalid OTP. Attempts left: " + left
+            );
         }
 
-        // OTP valid → delete
+        // 4️⃣ Success → cleanup
         otpStore.delete(request.email());
 
-        // Create user
+        // 5️⃣ Create user
         String hash = encoder.encode(request.password());
         User user = new User(request.email(), hash);
         userRepository.save(user);
 
-        // Issue JWT
+        // 6️⃣ Issue JWT
         String token = jwtUtil.generateToken(user.getEmail());
-
         return new LoginTokenResponse(token, user.getEmail());
     }
 
@@ -107,4 +117,33 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail());
         return new LoginTokenResponse(token, user.getEmail());
     }
+
+    public LogoutResponse logout() {
+        // Stateless JWT → nothing to invalidate server-side
+        return new LogoutResponse("Logged out successfully");
+    }
+
+
+    public RegisterResponse resendOtp(ResendOtpRequest request) {
+
+        String otp = otpStore.generateAndStore(request.email());
+
+        OtpEventPayload payload = new OtpEventPayload(
+                "EMAIL_OTP_RESENT",
+                request.email(),
+                otp,
+                "REGISTER"
+        );
+
+        try {
+            String json = objectMapper.writeValueAsString(payload);
+            otpEventProducer.send(json);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish OTP resend event", e);
+        }
+
+        return new RegisterResponse("OTP resent", request.email());
+    }
+
+
 }

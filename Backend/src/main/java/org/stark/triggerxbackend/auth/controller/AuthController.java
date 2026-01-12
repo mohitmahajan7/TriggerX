@@ -29,6 +29,18 @@ public class AuthController {
         return authService.verifyOtp(request);
     }
 
+    @PostMapping("/resend-otp")
+    public RegisterResponse resendOtp(@RequestBody ResendOtpRequest request) {
+        return authService.resendOtp(request);
+    }
+
+
+    @PostMapping("/logout")
+    public LogoutResponse logout() {
+        return authService.logout();
+    }
+
+
 
 
 }
