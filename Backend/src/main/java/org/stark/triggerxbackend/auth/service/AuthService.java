@@ -56,7 +56,11 @@ public class AuthService {
         );
 
         try {
-            otpEventProducer.send(objectMapper.writeValueAsString(payload));
+            otpEventProducer.send(
+                    payload,
+                    objectMapper.writeValueAsString(payload)
+            );
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to publish OTP event", e);
         }
@@ -139,7 +143,11 @@ public class AuthService {
         );
 
         try {
-            otpEventProducer.send(objectMapper.writeValueAsString(payload));
+            otpEventProducer.send(
+                    payload,
+                    objectMapper.writeValueAsString(payload)
+            );
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to publish OTP resend event", e);
         }
