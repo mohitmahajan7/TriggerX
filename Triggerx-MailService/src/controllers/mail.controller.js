@@ -6,7 +6,7 @@ const sendTestMail = async (req, res) => {
   await mailService.sendMail({
     to: email,
     subject: "TriggerX SMTP Test",
-    html: "<h2>SMTP is working !!!</h2>"
+    html: "<h2>SMTP is working !!! Yaay!!</h2>"
   });
 
   res.json({ message: "Email sent successfully" });
