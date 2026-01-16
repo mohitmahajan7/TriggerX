@@ -8,14 +8,13 @@ public class OtpEventProducer {
 
     private static final String TOPIC = "email-otp-events";
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public OtpEventProducer(KafkaTemplate<String, String> kafkaTemplate) {
+    public OtpEventProducer(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void send(OtpEventPayload payload, String message) {
-        kafkaTemplate.send(TOPIC, payload.email(), message);
+    public void send(OtpEventPayload payload) {
+        kafkaTemplate.send(TOPIC, payload.email(), payload);
     }
 }
-

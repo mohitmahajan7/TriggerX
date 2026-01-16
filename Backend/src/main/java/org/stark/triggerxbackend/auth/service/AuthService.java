@@ -1,6 +1,5 @@
 package org.stark.triggerxbackend.auth.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.stark.triggerxbackend.auth.dto.*;
@@ -23,7 +22,6 @@ public class AuthService {
     private final OtpEventProducer otpEventProducer;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AuthService(
             UserRepository userRepository,
@@ -55,15 +53,7 @@ public class AuthService {
                 "REGISTER"
         );
 
-        try {
-            otpEventProducer.send(
-                    payload,
-                    objectMapper.writeValueAsString(payload)
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to publish OTP event", e);
-        }
+        otpEventProducer.send(payload);
 
         return new RegisterResponse("OTP sent", request.email());
     }
@@ -105,7 +95,6 @@ public class AuthService {
         );
     }
 
-
     // ================= LOGIN =================
 
     public LoginTokenResponse login(LoginRequest request) {
@@ -123,12 +112,6 @@ public class AuthService {
         );
     }
 
-    // ================= LOGOUT =================
-
-    public LogoutResponse logout() {
-        return new LogoutResponse("Logged out successfully");
-    }
-
     // ================= RESEND OTP =================
 
     public RegisterResponse resendOtp(ResendOtpRequest request) {
@@ -142,16 +125,14 @@ public class AuthService {
                 "REGISTER"
         );
 
-        try {
-            otpEventProducer.send(
-                    payload,
-                    objectMapper.writeValueAsString(payload)
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to publish OTP resend event", e);
-        }
+        otpEventProducer.send(payload);
 
         return new RegisterResponse("OTP resent", request.email());
+    }
+
+    // ================= LOGOUT =================
+
+    public LogoutResponse logout() {
+        return new LogoutResponse("Logged out successfully");
     }
 }

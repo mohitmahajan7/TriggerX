@@ -19,15 +19,11 @@ public class OtpStore {
         this.redisTemplate = redisTemplate;
     }
 
-    // ================= OTP =================
-
     public String generateAndStore(String email) {
         email = normalize(email);
 
         String otp = generateOtp();
         redisTemplate.opsForValue().set(otpKey(email), otp, OTP_TTL);
-
-        // reset attempts on new / resend
         redisTemplate.delete(attemptKey(email));
 
         return otp;
@@ -42,8 +38,6 @@ public class OtpStore {
         redisTemplate.delete(otpKey(email));
         redisTemplate.delete(attemptKey(email));
     }
-
-    // ================= ATTEMPTS =================
 
     public void incrementAttempt(String email) {
         email = normalize(email);
@@ -69,8 +63,6 @@ public class OtpStore {
         Long ttl = redisTemplate.getExpire(attemptKey(normalize(email)));
         return ttl == null || ttl < 0 ? 0 : ttl;
     }
-
-    // ================= HELPERS =================
 
     private String generateOtp() {
         return String.valueOf(100_000 + RANDOM.nextInt(900_000));
