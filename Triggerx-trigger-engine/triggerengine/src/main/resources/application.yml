@@ -1,0 +1,36 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: trigger-engine
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/triggerx
+    username: triggerx_user
+    password: triggerx123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: trigger-engine-group
+      auto-offset-reset: latest
+
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+
+        spring.json.value.default.type: org.stark.triggerengine.dtos.MarketTick
+        spring.json.trusted.packages: "*"
+
+  redis:
+    host: localhost
+    port: 6379
