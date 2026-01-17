@@ -7,7 +7,6 @@ import org.stark.triggerxbackend.auth.event.OtpEventPayload;
 import org.stark.triggerxbackend.auth.event.OtpEventProducer;
 import org.stark.triggerxbackend.auth.otp.OtpStore;
 import org.stark.triggerxbackend.auth.util.JwtUtil;
-import org.stark.triggerxbackend.common.exception.OtpExpiredException;
 import org.stark.triggerxbackend.common.exception.OtpInvalidException;
 import org.stark.triggerxbackend.common.exception.OtpLockedException;
 import org.stark.triggerxbackend.user.model.User;
@@ -46,14 +45,14 @@ public class AuthService {
 
         String otp = otpStore.generateAndStore(request.email());
 
-        OtpEventPayload payload = new OtpEventPayload(
-                "EMAIL_OTP_REQUESTED",
-                request.email(),
-                otp,
-                "REGISTER"
+        otpEventProducer.send(
+                new OtpEventPayload(
+                        "EMAIL_OTP_REQUESTED",
+                        request.email(),
+                        otp,
+                        "REGISTER"
+                )
         );
-
-        otpEventProducer.send(payload);
 
         return new RegisterResponse("OTP sent", request.email());
     }
@@ -62,26 +61,18 @@ public class AuthService {
 
     public LoginTokenResponse verifyOtp(OtpVerifyRequest request) {
 
-        if (otpStore.isLocked(request.email())) {
+        if (otpStore.isBlocked(request.email())) {
             throw new OtpLockedException(
                     otpStore.retryAfterSeconds(request.email())
             );
         }
 
-        String storedOtp = otpStore.read(request.email());
-        if (storedOtp == null) {
-            throw new OtpExpiredException();
+        boolean verified = otpStore.verify(request.email(), request.otp());
+        if (!verified) {
+            throw new OtpInvalidException("Invalid OTP");
         }
 
-        if (!storedOtp.equals(request.otp())) {
-            otpStore.incrementAttempt(request.email());
-            throw new OtpInvalidException(
-                    "Invalid OTP. Attempts left: " +
-                            otpStore.attemptsLeft(request.email())
-            );
-        }
-
-        otpStore.delete(request.email());
+        otpStore.markSuccess(request.email());
 
         User user = new User(
                 request.email(),
@@ -93,6 +84,24 @@ public class AuthService {
                 jwtUtil.generateToken(user.getEmail()),
                 user.getEmail()
         );
+    }
+
+    // ================= RESEND OTP =================
+
+    public RegisterResponse resendOtp(ResendOtpRequest request) {
+
+        String otp = otpStore.generateAndStore(request.email());
+
+        otpEventProducer.send(
+                new OtpEventPayload(
+                        "EMAIL_OTP_RESENT",
+                        request.email(),
+                        otp,
+                        "REGISTER"
+                )
+        );
+
+        return new RegisterResponse("OTP resent", request.email());
     }
 
     // ================= LOGIN =================
@@ -110,24 +119,6 @@ public class AuthService {
                 jwtUtil.generateToken(user.getEmail()),
                 user.getEmail()
         );
-    }
-
-    // ================= RESEND OTP =================
-
-    public RegisterResponse resendOtp(ResendOtpRequest request) {
-
-        String otp = otpStore.generateAndStore(request.email());
-
-        OtpEventPayload payload = new OtpEventPayload(
-                "EMAIL_OTP_RESENT",
-                request.email(),
-                otp,
-                "REGISTER"
-        );
-
-        otpEventProducer.send(payload);
-
-        return new RegisterResponse("OTP resent", request.email());
     }
 
     // ================= LOGOUT =================
