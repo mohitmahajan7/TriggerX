@@ -20,11 +20,12 @@ public class JwtAuthFilter implements GlobalFilter {
     }
 
     @Override
+
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // 🔓 Public endpoints
+        // Public endpoints
         if (path.startsWith("/auth")) {
             return chain.filter(exchange);
         }
@@ -42,11 +43,23 @@ public class JwtAuthFilter implements GlobalFilter {
 
         try {
             jwtUtil.validate(token);
+
+            //  Extract email from JWT
+            String email = jwtUtil.extractEmail(token);
+
+            // Forward to downstream service as header
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                    .request(builder -> builder
+                            .header("X-User-Email", email)
+                    )
+                    .build();
+
+            return chain.filter(mutatedExchange);
+
         } catch (Exception e) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
-
-        return chain.filter(exchange);
     }
+
 }

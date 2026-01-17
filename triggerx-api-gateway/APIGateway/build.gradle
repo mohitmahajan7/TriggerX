@@ -18,25 +18,25 @@ repositories {
 
 dependencies {
 
-    // 🔗 SPRING BOOT BOM (FIXES spring-boot-starter-*)
+    //  SPRING BOOT BOM (FIXES spring-boot-starter-*)
     implementation platform("org.springframework.boot:spring-boot-dependencies:3.3.5")
 
-    // 🔗 SPRING CLOUD BOM (FIXES gateway, eureka)
+    //  SPRING CLOUD BOM (FIXES gateway, eureka)
     implementation platform("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
 
-    // 🌐 API Gateway + Eureka
+    //  API Gateway + Eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-    // 🔐 Security (NOW RESOLVES)
+    //  Security (NOW RESOLVES)
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // 🔑 JWT
+    //  JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // 📊 Actuator
+    //  Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
