@@ -55,7 +55,7 @@ public class TriggerService {
 
             Double lastPrice = Optional.ofNullable(hash.get(dataKey, "lastEvaluatedPrice")).map(Double::parseDouble).orElse(null);
 
-            // First tick — only initialize price
+            // only initialize price
             if (lastPrice == null) {
                 updateLastPrice(hash, dataKey, tick.price());
                 continue;

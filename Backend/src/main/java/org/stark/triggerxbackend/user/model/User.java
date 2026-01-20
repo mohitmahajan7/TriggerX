@@ -20,15 +20,11 @@ public class User {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    /**
-     * JPA only
-     */
+
     protected User() {
     }
 
-    /**
-     * Controlled creation
-     */
+
     public User(String email, String passwordHash) {
         this.id = UUID.randomUUID().toString();
         this.email = email;

@@ -17,11 +17,11 @@ public class TriggerCacheService {
 
         String triggerId = trigger.getId().toString();
 
-        // 1️⃣ Symbol → trigger mapping
+        // Symbol → trigger mapping
         redis.opsForSet()
                 .add("triggers:symbol:" + trigger.getSymbol(), triggerId);
 
-        // 2️⃣ Trigger data
+        // Trigger data
         redis.opsForHash()
                 .putAll("trigger:data:" + triggerId, Map.of(
                         "userId", trigger.getUserId(),

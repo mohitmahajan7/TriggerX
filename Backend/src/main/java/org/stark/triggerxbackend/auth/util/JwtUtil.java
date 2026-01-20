@@ -17,11 +17,6 @@ public class JwtUtil {
         this.secret = secret;
     }
 
-    @PostConstruct
-    public void checkJwt(){
-        System.out.println(secret);
-    }
-
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }

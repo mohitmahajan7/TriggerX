@@ -36,33 +36,18 @@ public class MarketTrigger {
     @Enumerated(EnumType.STRING)
     private TriggerStatus status = TriggerStatus.ACTIVE;
 
-    /**
-     * If true → trigger fires only once
-     */
     private boolean oneShot = true;
 
-    /**
-     * Cooldown period (seconds)
-     */
     private int cooldownSeconds = 0;
 
-    /**
-     * Last time trigger fired
-     */
     private Instant lastTriggeredAt;
 
-    /**
-     * Last evaluated price for crossing detection
-     */
     private Double lastEvaluatedPrice;
 
     private Instant createdAt;
 
     private Instant updatedAt;
 
-    /**
-     * Optimistic locking
-     */
     @Version
     private long version;
 

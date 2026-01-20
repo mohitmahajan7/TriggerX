@@ -1,6 +1,5 @@
 package org.stark.triggerxbackend.auth.filter;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
